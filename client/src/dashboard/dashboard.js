@@ -54,6 +54,9 @@ const useStyles = makeStyles(theme => ({
   },
   chart: {
     alignSelf: "center"
+  },
+  grow: {
+    flexGrow: 1
   }
 }));
 
@@ -85,13 +88,13 @@ const DashBoard = ({ history }) => {
     >
       {map(reports, rep => {
         return (
-          <Grid item xs={12} sm={3} key={rep._id}>
+          <Grid item xs={12} sm={5} md={4} lg={3} key={rep._id}>
             <Card
               className={classes.reportItem}
               onClick={() => history.push(`/reports/${rep._id}`)}
             >
               <Grid container direction="row">
-                <Grid item xs={9}>
+                <Grid item className={classes.grow}>
                   <CardContent>
                     <Typography className={classes.color1} variant="subtitle1">
                       {rep.category}
@@ -100,6 +103,7 @@ const DashBoard = ({ history }) => {
                       className={classes.color2}
                       component="h6"
                       variant="h6"
+                      noWrap
                     >
                       {rep.moduleName}
                     </Typography>
@@ -112,8 +116,13 @@ const DashBoard = ({ history }) => {
                     </Typography>
                   </CardContent>
                 </Grid>
-                <Grid item xs={3} className={classes.chart}>
-                  <Box display="flex" justifyContent="center" alignItems="center">
+                <Grid item className={classes.chart}>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    pr={2}
+                  >
                     <DonutChart />
                   </Box>
                 </Grid>

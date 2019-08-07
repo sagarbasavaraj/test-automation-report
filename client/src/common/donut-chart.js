@@ -37,7 +37,7 @@ class DonutChart extends PureComponent {
   };
 
   static defaultProps = {
-    value: 60,
+    value: 0,
     size: 70,
     strokewidth: 10
   };

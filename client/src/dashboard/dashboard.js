@@ -10,6 +10,7 @@ import {
 import { get } from "../helpers/api";
 import { map } from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
+import DonutChart from "../common/donut-chart";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,6 +51,9 @@ const useStyles = makeStyles(theme => ({
   },
   divider: {
     color: "#0f305b"
+  },
+  chart: {
+    alignSelf: "center"
   }
 }));
 
@@ -86,30 +90,37 @@ const DashBoard = ({ history }) => {
               className={classes.reportItem}
               onClick={() => history.push(`/reports/${rep._id}`)}
             >
-              <div className={classes.details}>
-                <CardContent className={classes.content}>
-                  <Typography className={classes.color1} variant="subtitle1">
-                    {rep.category}
-                  </Typography>
-                  <Typography
-                    className={classes.color2}
-                    component="h6"
-                    variant="h6"
-                  >
-                    {rep.moduleName}
-                  </Typography>
-                  <Typography
-                    className={classes.color1}
-                    variant="subtitle2"
-                    gutterBottom
-                  >
-                    {`Build No. ${rep.buildNo}`}
-                  </Typography>
-                  <Box mt={3}>
-                    <Divider className={classes.divider} />
+              <Grid container direction="row">
+                <Grid item xs={9}>
+                  <CardContent>
+                    <Typography className={classes.color1} variant="subtitle1">
+                      {rep.category}
+                    </Typography>
+                    <Typography
+                      className={classes.color2}
+                      component="h6"
+                      variant="h6"
+                    >
+                      {rep.moduleName}
+                    </Typography>
+                    <Typography
+                      className={classes.color1}
+                      variant="subtitle2"
+                      gutterBottom
+                    >
+                      {`Build No. ${rep.buildNo}`}
+                    </Typography>
+                  </CardContent>
+                </Grid>
+                <Grid item xs={3} className={classes.chart}>
+                  <Box display="flex" justifyContent="center" alignItems="center">
+                    <DonutChart />
                   </Box>
-                </CardContent>
-              </div>
+                </Grid>
+              </Grid>
+              <Box px={2} pb={2}>
+                <Divider className={classes.divider} />
+              </Box>
               <Box pb={2}>
                 <Grid direction="row" container className={classes.footer}>
                   <Grid item xs={3}>

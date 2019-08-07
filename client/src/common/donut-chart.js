@@ -3,29 +3,27 @@ import { number } from "prop-types";
 import { withStyles } from "@material-ui/styles";
 
 const styles = {
-  chart: {
-    borderRadius: "50%"
-  },
   track: {
     fill: "transparent",
-    stroke: "#DAE2E5",
+    stroke: "#001f4b",
     strokeWidth: 10
   },
   indicator: {
     fill: "transparent",
-    stroke: "#009688",
+    stroke: "#cee308",
     strokeWidth: 10,
     strokeDasharray: "0 10000",
+    strokeLinecap: "round",
     transition: "stroke-dasharray .3s ease"
   },
   text: {
-    fill: "#607580"
+    fill: "#c0cfdc"
   },
   val: {
-    fontSize: "22px"
+    fontSize: "18px"
   },
   percent: {
-    fontSize: "14px"
+    fontSize: "12px"
   }
 };
 
@@ -39,7 +37,7 @@ class DonutChart extends PureComponent {
   static defaultProps = {
     value: 0,
     size: 70,
-    strokewidth: 10
+    strokewidth: 8
   };
 
   render() {
@@ -55,13 +53,12 @@ class DonutChart extends PureComponent {
       strokeWidth: this.props.strokewidth,
       strokeDasharray: dashval
     };
-    const rotateval = "rotate(-90 " + halfsize + "," + halfsize + ")";
+    const rotateval = "rotate(90 " + halfsize + "," + halfsize + ")";
 
     return (
       <svg
         width={this.props.size}
         height={this.props.size}
-        className={classes.chart}
       >
         <circle
           r={radius}
@@ -81,7 +78,7 @@ class DonutChart extends PureComponent {
         />
         <text
           className={classes.text}
-          x={halfsize + 3}
+          x={halfsize + 2}
           y={halfsize + 5}
           style={{ textAnchor: "middle" }}
         >

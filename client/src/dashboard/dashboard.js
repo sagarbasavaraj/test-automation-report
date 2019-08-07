@@ -87,6 +87,8 @@ const DashBoard = ({ history }) => {
       spacing={1}
     >
       {map(reports, rep => {
+        const totalComp = ((rep.passed + rep.failed) / rep.total) * 100;
+        const completedPercentage = Math.round(totalComp);
         return (
           <Grid item xs={12} sm={5} md={4} lg={3} key={rep._id}>
             <Card
@@ -123,7 +125,7 @@ const DashBoard = ({ history }) => {
                     alignItems="center"
                     pr={2}
                   >
-                    <DonutChart />
+                    <DonutChart value={completedPercentage} />
                   </Box>
                 </Grid>
               </Grid>

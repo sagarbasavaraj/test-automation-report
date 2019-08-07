@@ -10,7 +10,7 @@ const orderSchema = new Schema({
   passed: Number,
   failed: Number,
   running: Number,
-  completed: Number
+  details: [Object]
 });
 
 const ReportModel = mongoose.model("Report", orderSchema);

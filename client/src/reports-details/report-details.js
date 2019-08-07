@@ -12,6 +12,8 @@ import {
   Button
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import { get } from "../helpers/api";
+import { get as _get } from "lodash";
 
 const styles = {
   root: {
@@ -74,187 +76,15 @@ const styles = {
   }
 };
 
-const data = [
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.6",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.7",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.8",
-    smokeStatus: "fail",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.9",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.10",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.11",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.12",
-    smokeStatus: "fail",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.13",
-    smokeStatus: "pass",
-    deploymentStatus: "pass",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.14",
-    buildNo: "CBO v2.0.9",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.15",
-    buildNo: "CBO v2.0.10",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.16",
-    buildNo: "CBO v2.0.6",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.17",
-    buildNo: "CBO v2.0.7",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.18",
-    buildNo: "CBO v2.0.8",
-    smokeStatus: "fail",
-    deploymentStatus: "fail",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.19",
-    buildNo: "CBO v2.0.9",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.20",
-    buildNo: "CBO v2.0.10",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.12",
-    smokeStatus: "fail",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.01",
-    buildNo: "CBO v2.0.13",
-    smokeStatus: "pass",
-    deploymentStatus: "pass",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.14",
-    buildNo: "CBO v2.0.9",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.15",
-    buildNo: "CBO v2.0.10",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.16",
-    buildNo: "CBO v2.0.6",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.17",
-    buildNo: "CBO v2.0.7",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.18",
-    buildNo: "CBO v2.0.8",
-    smokeStatus: "fail",
-    deploymentStatus: "fail",
-    regressionStatus: "fail"
-  },
-  {
-    ipAddress: "192.17.15.19",
-    buildNo: "CBO v2.0.9",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  },
-  {
-    ipAddress: "192.17.15.20",
-    buildNo: "CBO v2.0.10",
-    smokeStatus: "pass",
-    deploymentStatus: "success",
-    regressionStatus: "pass"
-  }
-];
-
 class ReportDetails extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       page: 0,
       rowsPerPage: 10,
-      total: 270,
-      passed: 210,
-      failed: 6,
-      runnung: 54
+      report: null,
+      loading: true,
+      err: null
     };
   }
 
@@ -269,9 +99,27 @@ class ReportDetails extends PureComponent {
     this.setState({ page: newPage });
   };
 
+  componentDidMount() {
+    const { match } = this.props;
+    get(`/reports/${match.params.id}`)
+      .then(res => {
+        this.setState({ report: res, loading: false });
+      })
+      .catch(err => {
+        console.error(err);
+        this.setState({ err, loading: false });
+      });
+  }
+
   render() {
-    const { page, rowsPerPage, total, passed, failed, runnung } = this.state;
+    const { page, rowsPerPage, report, loading } = this.state;
+    const details = _get(report, "details") || [];
     const { classes, history } = this.props;
+
+    if (loading) {
+      return <div>Loading Report data....</div>;
+    }
+
     return (
       <Container className={classes.root}>
         <Button
@@ -283,18 +131,20 @@ class ReportDetails extends PureComponent {
         </Button>
         <Toolbar className={classes.toolbar}>
           <div className={classes.title}>
-            <Typography variant="h6">CBO Beratung</Typography>
+            <Typography variant="h6">{report.moduleName}</Typography>
           </div>
           <div className={classes.spacer} />
           <div className={classes.info}>
             <Typography>Total</Typography>
-            <Typography className={classes.total}>{total}</Typography>
+            <Typography className={classes.total}>{report.total}</Typography>
             <Typography>Passed</Typography>
-            <Typography className={classes.passed}>{passed}</Typography>
+            <Typography className={classes.passed}>{report.passed}</Typography>
             <Typography>Failed</Typography>
-            <Typography className={classes.failed}>{failed}</Typography>
+            <Typography className={classes.failed}>{report.failed}</Typography>
             <Typography>Running</Typography>
-            <Typography className={classes.running}>{runnung}</Typography>
+            <Typography className={classes.running}>
+              {report.runnung}
+            </Typography>
           </div>
         </Toolbar>
         <div>
@@ -319,7 +169,7 @@ class ReportDetails extends PureComponent {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data
+              {details
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   return (
@@ -350,7 +200,7 @@ class ReportDetails extends PureComponent {
           nextIconButtonProps={{
             "aria-label": "next page"
           }}
-          count={data.length}
+          count={details.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={this.handleChangePage}

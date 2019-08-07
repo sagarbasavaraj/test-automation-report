@@ -1,15 +1,19 @@
 const express = require("express");
 const { keyBy } = require("lodash");
 const ReportModel = require("../db/models/report");
+const { ObjectId } = require("mongoose").Types;
 
 const reportsRouter = express.Router();
 
 reportsRouter.get("/", (req, res) => {
-  ReportModel.find((err, reports) => {
-    if (err) return res.status(500).send(err);
-    const reportsData = keyBy(reports, "_id");
-    return res.json(reportsData);
-  });
+  ReportModel.find({},
+    "_id category moduleName buildNo total passed failed running",
+    (err, reports) => {
+      if (err) return res.status(500).send(err);
+      const reportsData = keyBy(reports, "_id");
+      return res.json(reportsData);
+    }
+  );
 });
 
 reportsRouter.post("/", async (req, res) => {
@@ -25,8 +29,25 @@ reportsRouter.post("/", async (req, res) => {
 
 reportsRouter.get("/:id", (req, res) => {
   //get individual reports details
-  console.log(req.params);
-  res.send("getting report details");
+  const { params } = req;
+  ReportModel.findById(ObjectId(params.id), (err, report) => {
+    if (err) return res.status(500).send(err);
+    return res.json(report);
+  });
+});
+
+reportsRouter.put("/:id", (req, res) => {
+  const { body, params } = req;
+  ReportModel.findByIdAndUpdate(
+    ObjectId(params.id),
+    body,
+    { new: true },
+    (err, updatedReport) => {
+      // Handle any possible database errors
+      if (err) return res.status(500).send(err);
+      return res.json(updatedReport);
+    }
+  );
 });
 
 module.exports = reportsRouter;

@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { number } from "prop-types";
+import { number, string } from "prop-types";
 import { withStyles } from "@material-ui/styles";
 
 const styles = {
@@ -10,11 +10,15 @@ const styles = {
   },
   indicator: {
     fill: "transparent",
-    stroke: "#cee308",
+    stroke: props => props.status === "red" ? "#d10525" : "#cee308",
     strokeWidth: 10,
     strokeDasharray: "0 10000",
-    strokeLinecap: "round",
-    transition: "stroke-dasharray .3s ease"
+    //strokeLinecap: props => props.value ? "round" : "",
+    transition: "stroke-dasharray .3s ease",
+
+    "&.red": {
+      stroke: "#d10525",
+    }
   },
   text: {
     fill: "#c0cfdc"
@@ -31,13 +35,15 @@ class DonutChart extends PureComponent {
   static propTypes = {
     value: number,
     size: number,
-    strokeWidth: number
+    strokeWidth: number,
+    status: string
   };
 
   static defaultProps = {
     value: 0,
     size: 70,
-    strokewidth: 8
+    strokewidth: 8,
+    status: ""
   };
 
   render() {

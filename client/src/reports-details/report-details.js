@@ -12,8 +12,10 @@ import {
   Button
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import KeyboardArrowLeftIcon from "@material-ui/icons/KeyboardArrowLeft";
 import { get } from "../helpers/api";
 import { get as _get } from "lodash";
+import { socket } from "../helpers/api";
 
 const styles = {
   root: {
@@ -82,7 +84,8 @@ class ReportDetails extends PureComponent {
     this.state = {
       page: 0,
       rowsPerPage: 10,
-      report: null,
+      report: {},
+      reportDetails: [],
       loading: true,
       err: null
     };
@@ -99,21 +102,44 @@ class ReportDetails extends PureComponent {
     this.setState({ page: newPage });
   };
 
-  componentDidMount() {
+  load = async () => {
     const { match } = this.props;
-    get(`/reports/${match.params.id}`)
-      .then(res => {
-        this.setState({ report: res, loading: false });
-      })
-      .catch(err => {
-        console.error(err);
-        this.setState({ err, loading: false });
-      });
+    try {
+      const report = await get(`/reports/${match.params.id}`);
+      const moduleName = _get(report, "moduleName");
+      const reportDetails = await get(`/reports/details/${moduleName}`);
+      this.setState({ report, reportDetails });
+    } catch (err) {
+      console.error(err);
+      this.setState({ err });
+    } finally {
+      this.setState({ loading: false });
+    }
+  };
+
+  updateReport = report => {
+    this.setState({ report });
+  };
+
+  updateReportDetail = reportDetail => {
+    this.setState(state => ({
+      reportDetails: state.reportDetails.concat(reportDetail)
+    }));
+  };
+
+  componentDidMount() {
+    this.load();
+    socket.on("updatedreport", this.updateReport);
+    socket.on("newdetail", this.updateReportDetail);
+  }
+
+  componentWillUnmount() {
+    socket.off("updatedreport", this.updateReport);
+    socket.off("newdetail", this.updateReportDetail);
   }
 
   render() {
-    const { page, rowsPerPage, report, loading } = this.state;
-    const details = _get(report, "details") || [];
+    const { page, rowsPerPage, report, loading, reportDetails } = this.state;
     const { classes, history } = this.props;
 
     if (loading) {
@@ -127,6 +153,7 @@ class ReportDetails extends PureComponent {
           className={classes.button}
           onClick={() => history.push("/")}
         >
+          <KeyboardArrowLeftIcon />
           Cockpit
         </Button>
         <Toolbar className={classes.toolbar}>
@@ -143,7 +170,7 @@ class ReportDetails extends PureComponent {
             <Typography className={classes.failed}>{report.failed}</Typography>
             <Typography>Running</Typography>
             <Typography className={classes.running}>
-              {report.runnung}
+              {report.running}
             </Typography>
           </div>
         </Toolbar>
@@ -166,10 +193,11 @@ class ReportDetails extends PureComponent {
                 <TableCell className={classes.tableHeaderCell}>
                   Regression Suite Status
                 </TableCell>
+                <TableCell className={classes.tableHeaderCell}>Date</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {details
+              {reportDetails
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   return (
@@ -184,6 +212,9 @@ class ReportDetails extends PureComponent {
                       </TableCell>
                       <TableCell className={classes[row.regressionStatus]}>
                         {row.regressionStatus}
+                      </TableCell>
+                      <TableCell className={classes[row.regressionStatus]}>
+                        {row.datetime}
                       </TableCell>
                     </TableRow>
                   );
@@ -200,7 +231,7 @@ class ReportDetails extends PureComponent {
           nextIconButtonProps={{
             "aria-label": "next page"
           }}
-          count={details.length}
+          count={reportDetails.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={this.handleChangePage}

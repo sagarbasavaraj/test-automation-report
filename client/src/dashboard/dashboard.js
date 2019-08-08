@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useReducer, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -10,7 +10,9 @@ import {
 import { get } from "../helpers/api";
 import { map } from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
+import Immutable from "seamless-immutable";
 import DonutChart from "../common/donut-chart";
+import { socket } from "../helpers/api";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -60,21 +62,50 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const initialState = Immutable({ reports: {} });
+
+function reducer(state, action) {
+  const { type, payload } = action;
+
+  switch (type) {
+    case "SET_REPORTS":
+      return state.set("reports", payload.reports);
+    case "SET_REPORT":
+      return state.setIn(["reports", payload.report._id], payload.report);
+    default:
+      return state;
+  }
+}
+
 const DashBoard = ({ history }) => {
-  const [reports, setReports] = useState([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const classes = useStyles();
   const fetchReports = async () => {
     try {
-      const reportsData = await get("/reports");
-      setReports(reportsData);
+      const reports = await get("/reports");
+      dispatch({ type: "SET_REPORTS", payload: { reports } });
     } catch (err) {
       console.log(err);
     }
   };
 
+  const updateReport = report => {
+    console.log(report);
+    dispatch({ type: "SET_REPORT", payload: { report } });
+  };
+
   useEffect(() => {
     fetchReports();
+    socket.on("updatedreport", updateReport);
+    socket.on("newreport", updateReport);
+    //clean up if component is getting unmounted.
+    return () => {
+      socket.off("updatedreport", updateReport);
+      socket.off("newreport", updateReport);
+    };
   }, []);
+
+  const { reports } = state;
 
   return (
     <Box
@@ -125,7 +156,10 @@ const DashBoard = ({ history }) => {
                     alignItems="center"
                     pr={2}
                   >
-                    <DonutChart value={completedPercentage} />
+                    <DonutChart
+                      value={completedPercentage}
+                      status={rep.failed ? "red" : "success"}
+                    />
                   </Box>
                 </Grid>
               </Grid>

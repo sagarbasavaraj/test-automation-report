@@ -1,10 +1,10 @@
 import axios from "axios";
 import socketIoClient from "socket.io-client";
 
-export const socket = socketIoClient("http://192.168.2.101:5000");
+export const socket = socketIoClient("https://test-report-server.herokuapp.com");
 
 export const initApi = () => {
-  axios.defaults.baseURL = "http://localhost:5000/api";
+  axios.defaults.baseURL = "https://test-report-server.herokuapp.com/api";
 };
 
 export const get = (url, params) =>

@@ -9,17 +9,31 @@ import {
   TableRow,
   Toolbar,
   Typography,
-  Button
+  Button,
+  CircularProgress,
+  Box,
+  Snackbar,
+  SnackbarContent,
+  IconButton
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import KeyboardArrowLeftIcon from "@material-ui/icons/KeyboardArrowLeft";
+import ErrorIcon from "@material-ui/icons/Error";
+import clsx from "clsx";
+import CloseIcon from "@material-ui/icons/Close";
 import { get } from "../helpers/api";
 import { get as _get } from "lodash";
 import { socket } from "../helpers/api";
 
-const styles = {
+const snackBarAlign = {
+  vertical: "top",
+  horizontal: "center"
+};
+
+const styles = theme => ({
   root: {
-    paddingTop: "75px"
+    paddingTop: "75px",
+    "min-height": "100vh"
   },
   button: {
     backgroundColor: "#FFFFFF",
@@ -75,8 +89,22 @@ const styles = {
   toolbar: {
     paddingLeft: "0px",
     paddingRight: "0px"
+  },
+  icon: {
+    fontSize: 20
+  },
+  iconVariant: {
+    opacity: 0.9,
+    marginRight: theme.spacing(1)
+  },
+  error: {
+    backgroundColor: theme.palette.error.dark
+  },
+  message: {
+    display: "flex",
+    alignItems: "center"
   }
-};
+});
 
 class ReportDetails extends PureComponent {
   constructor(props) {
@@ -138,12 +166,32 @@ class ReportDetails extends PureComponent {
     socket.off("newdetail", this.updateReportDetail);
   }
 
+  handleErrorClose = () => {
+    this.setState({ err: null });
+  };
+
   render() {
-    const { page, rowsPerPage, report, loading, reportDetails } = this.state;
+    const {
+      page,
+      rowsPerPage,
+      report,
+      loading,
+      reportDetails,
+      err
+    } = this.state;
     const { classes, history } = this.props;
 
     if (loading) {
-      return <div>Loading Report data....</div>;
+      return (
+        <Box
+          className={classes.root}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress color="secondary" />
+        </Box>
+      );
     }
 
     return (
@@ -156,6 +204,34 @@ class ReportDetails extends PureComponent {
           <KeyboardArrowLeftIcon />
           Cockpit
         </Button>
+        <Snackbar
+          anchorOrigin={snackBarAlign}
+          open={err !== null}
+          onClose={this.handleErrorClose}
+        >
+          <SnackbarContent
+            className={classes.error}
+            aria-describedby="client-snackbar"
+            message={
+              <span id="client-snackbar" className={classes.message}>
+                <ErrorIcon
+                  className={clsx(classes.icon, classes.iconVariant)}
+                />
+                Error in fetching report.
+              </span>
+            }
+            action={[
+              <IconButton
+                key="close"
+                aria-label="close"
+                color="inherit"
+                onClick={this.handleErrorClose}
+              >
+                <CloseIcon className={classes.icon} />
+              </IconButton>
+            ]}
+          />
+        </Snackbar>
         <Toolbar className={classes.toolbar}>
           <div className={classes.title}>
             <Typography variant="h6">{report.moduleName}</Typography>

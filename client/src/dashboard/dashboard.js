@@ -5,12 +5,19 @@ import {
   Card,
   CardContent,
   Typography,
-  Divider
+  Divider,
+  CircularProgress,
+  Snackbar,
+  IconButton,
+  SnackbarContent
 } from "@material-ui/core";
 import { get } from "../helpers/api";
 import { map } from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
+import ErrorIcon from "@material-ui/icons/Error";
+import clsx from "clsx";
 import Immutable from "seamless-immutable";
+import CloseIcon from "@material-ui/icons/Close";
 import DonutChart from "../common/donut-chart";
 import { socket } from "../helpers/api";
 
@@ -59,10 +66,24 @@ const useStyles = makeStyles(theme => ({
   },
   grow: {
     flexGrow: 1
+  },
+  icon: {
+    fontSize: 20
+  },
+  iconVariant: {
+    opacity: 0.9,
+    marginRight: theme.spacing(1)
+  },
+  error: {
+    backgroundColor: theme.palette.error.dark
+  },
+  message: {
+    display: "flex",
+    alignItems: "center"
   }
 }));
 
-const initialState = Immutable({ reports: {} });
+const initialState = Immutable({ reports: {}, loading: true, err: null });
 
 function reducer(state, action) {
   const { type, payload } = action;
@@ -72,20 +93,38 @@ function reducer(state, action) {
       return state.set("reports", payload.reports);
     case "SET_REPORT":
       return state.setIn(["reports", payload.report._id], payload.report);
+    case "SET_LOADER_STATUS": {
+      return state.set("loading", payload);
+    }
+    case "SET_ERROR": {
+      return state.set("err", payload.err);
+    }
+    case "CLEAR_ERROR": {
+      return state.set("err", null);
+    }
     default:
       return state;
   }
 }
+const snackBarAlign = {
+  vertical: "top",
+  horizontal: "center"
+};
 
 const DashBoard = ({ history }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const classes = useStyles();
+
   const fetchReports = async () => {
     try {
       const reports = await get("/reports");
       dispatch({ type: "SET_REPORTS", payload: { reports } });
+      dispatch({ type: "SET_LOADER_STATUS", payload: true });
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      dispatch({ type: "SET_ERROR", payload: { err } });
+    } finally {
+      dispatch({ type: "SET_LOADER_STATUS", payload: false });
     }
   };
 
@@ -105,7 +144,24 @@ const DashBoard = ({ history }) => {
     };
   }, []);
 
-  const { reports } = state;
+  const handleErrorClose = () => {
+    dispatch({ type: "CLEAR_ERROR" });
+  };
+
+  const { reports, loading, err } = state;
+
+  if (loading) {
+    return (
+      <Box
+        className={classes.root}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <CircularProgress color="secondary" />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -117,6 +173,32 @@ const DashBoard = ({ history }) => {
       direction="row"
       spacing={1}
     >
+      <Snackbar
+        anchorOrigin={snackBarAlign}
+        open={err !== null}
+        onClose={handleErrorClose}
+      >
+        <SnackbarContent
+          className={classes.error}
+          aria-describedby="client-snackbar"
+          message={
+            <span id="client-snackbar" className={classes.message}>
+              <ErrorIcon className={clsx(classes.icon, classes.iconVariant)} />
+              Error in fetching report.
+            </span>
+          }
+          action={[
+            <IconButton
+              key="close"
+              aria-label="close"
+              color="inherit"
+              onClick={handleErrorClose}
+            >
+              <CloseIcon className={classes.icon} />
+            </IconButton>
+          ]}
+        />
+      </Snackbar>
       {map(reports, rep => {
         const totalComp = ((rep.passed + rep.failed) / rep.total) * 100;
         const completedPercentage = Math.round(totalComp);

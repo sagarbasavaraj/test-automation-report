@@ -39,7 +39,7 @@ export default function Header() {
           </Typography>
         </Link>
         <div className={classes.grow} />
-        <Avatar className={classes.avatar} alt="DB" src={DbLogo} />
+        {/*<Avatar className={classes.avatar} alt="DB" src={DbLogo} />*/}
       </Toolbar>
     </AppBar>
   );

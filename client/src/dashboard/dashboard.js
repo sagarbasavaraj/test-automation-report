@@ -157,6 +157,9 @@ const DashBoard = ({ history }) => {
         display="flex"
         justifyContent="center"
         alignItems="center"
+        px={3}
+        pt={10}
+        pb={3}
       >
         <CircularProgress color="secondary" />
       </Box>
@@ -164,162 +167,161 @@ const DashBoard = ({ history }) => {
   }
 
   return (
-    <Box
-      className={classes.root}
-      px={3}
-      py={10}
-      component={Grid}
-      container
-      direction="row"
-      spacing={1}
-    >
-      <Snackbar
-        anchorOrigin={snackBarAlign}
-        open={err !== null}
-        onClose={handleErrorClose}
-      >
-        <SnackbarContent
-          className={classes.error}
-          aria-describedby="client-snackbar"
-          message={
-            <span id="client-snackbar" className={classes.message}>
-              <ErrorIcon className={clsx(classes.icon, classes.iconVariant)} />
-              Error in fetching report.
-            </span>
-          }
-          action={[
-            <IconButton
-              key="close"
-              aria-label="close"
-              color="inherit"
-              onClick={handleErrorClose}
-            >
-              <CloseIcon className={classes.icon} />
-            </IconButton>
-          ]}
-        />
-      </Snackbar>
-      {map(reports, rep => {
-        const totalComp = ((rep.passed + rep.failed) / rep.total) * 100;
-        const completedPercentage = Math.round(totalComp);
-        return (
-          <Grid item xs={12} sm={5} md={4} lg={3} key={rep._id}>
-            <Card
-              className={classes.reportItem}
-              onClick={() => history.push(`/reports/${rep._id}`)}
-            >
-              <Grid container direction="row">
-                <Grid item className={classes.grow}>
-                  <CardContent>
-                    <Typography className={classes.color1} variant="subtitle1">
-                      {rep.category}
-                    </Typography>
-                    <Typography
-                      className={classes.color2}
-                      component="h6"
-                      variant="h6"
-                      noWrap
-                    >
-                      {rep.moduleName}
-                    </Typography>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle2"
-                      gutterBottom
-                    >
-                      {`Build No. ${rep.buildNo}`}
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item className={classes.chart}>
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    pr={2}
-                  >
-                    <DonutChart
-                      value={completedPercentage}
-                      status={rep.failed ? "red" : "success"}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-              <Box px={2} pb={2}>
-                <Divider className={classes.divider} />
-              </Box>
-              <Box pb={2}>
-                <Grid direction="row" container className={classes.footer}>
-                  <Grid item xs={3}>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle2"
-                      align="center"
-                    >
-                      Total
-                    </Typography>
-                    <Typography
-                      className={classes.color2}
-                      variant="subtitle1"
-                      align="center"
-                    >
-                      {rep.total}
-                    </Typography>
+    <Box px={3} pt={10} pb={3} className={classes.root}>
+      <Grid container direction="row" spacing={1}>
+        <Snackbar
+          anchorOrigin={snackBarAlign}
+          open={err !== null}
+          onClose={handleErrorClose}
+        >
+          <SnackbarContent
+            className={classes.error}
+            aria-describedby="client-snackbar"
+            message={
+              <span id="client-snackbar" className={classes.message}>
+                <ErrorIcon
+                  className={clsx(classes.icon, classes.iconVariant)}
+                />
+                Error in fetching report.
+              </span>
+            }
+            action={[
+              <IconButton
+                key="close"
+                aria-label="close"
+                color="inherit"
+                onClick={handleErrorClose}
+              >
+                <CloseIcon className={classes.icon} />
+              </IconButton>
+            ]}
+          />
+        </Snackbar>
+        {map(reports, rep => {
+          const totalComp = ((rep.passed + rep.failed) / rep.total) * 100;
+          const completedPercentage = Math.round(totalComp);
+          return (
+            <Grid item xs={12} sm={5} md={4} lg={3} key={rep._id}>
+              <Card
+                className={classes.reportItem}
+                onClick={() => history.push(`/reports/${rep._id}`)}
+              >
+                <Grid container direction="row">
+                  <Grid item className={classes.grow}>
+                    <CardContent>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle1"
+                      >
+                        {rep.category}
+                      </Typography>
+                      <Typography
+                        className={classes.color2}
+                        component="h6"
+                        variant="h6"
+                        noWrap
+                      >
+                        {rep.moduleName}
+                      </Typography>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle2"
+                        gutterBottom
+                      >
+                        {`Build No. ${rep.buildNo}`}
+                      </Typography>
+                    </CardContent>
                   </Grid>
-                  <Grid item xs={3}>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle2"
-                      align="center"
+                  <Grid item className={classes.chart}>
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      pr={2}
                     >
-                      Passed
-                    </Typography>
-                    <Typography
-                      className={classes.passed}
-                      variant="subtitle1"
-                      align="center"
-                    >
-                      {rep.passed}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle2"
-                      align="center"
-                    >
-                      Failed
-                    </Typography>
-                    <Typography
-                      className={classes.failed}
-                      variant="subtitle1"
-                      align="center"
-                    >
-                      {rep.failed}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle2"
-                      align="center"
-                    >
-                      Running
-                    </Typography>
-                    <Typography
-                      className={classes.color1}
-                      variant="subtitle1"
-                      align="center"
-                    >
-                      {rep.running}
-                    </Typography>
+                      <DonutChart
+                        value={completedPercentage}
+                        status={rep.failed ? "red" : "success"}
+                      />
+                    </Box>
                   </Grid>
                 </Grid>
-              </Box>
-            </Card>
-          </Grid>
-        );
-      })}
+                <Box px={2} pb={2}>
+                  <Divider className={classes.divider} />
+                </Box>
+                <Box pb={2}>
+                  <Grid direction="row" container className={classes.footer}>
+                    <Grid item xs={3}>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle2"
+                        align="center"
+                      >
+                        Total
+                      </Typography>
+                      <Typography
+                        className={classes.color2}
+                        variant="subtitle1"
+                        align="center"
+                      >
+                        {rep.total}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle2"
+                        align="center"
+                      >
+                        Passed
+                      </Typography>
+                      <Typography
+                        className={classes.passed}
+                        variant="subtitle1"
+                        align="center"
+                      >
+                        {rep.passed}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle2"
+                        align="center"
+                      >
+                        Failed
+                      </Typography>
+                      <Typography
+                        className={classes.failed}
+                        variant="subtitle1"
+                        align="center"
+                      >
+                        {rep.failed}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle2"
+                        align="center"
+                      >
+                        Running
+                      </Typography>
+                      <Typography
+                        className={classes.color1}
+                        variant="subtitle1"
+                        align="center"
+                      >
+                        {rep.running}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
     </Box>
   );
 };

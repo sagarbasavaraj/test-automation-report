@@ -47,33 +47,32 @@ const styles = theme => ({
     color: "#000000"
   },
   pass: {
-    color: "#cee308"
+    color: "#00e315"
   },
   success: {
-    color: "#cee308"
+    color: "#00e315"
   },
   fail: {
     color: "#995875"
   },
   title: {
-    width: "30%"
-  },
-  spacer: {
-    width: "20%"
+    width: "30%",
   },
   info: {
-    width: "50%",
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: "10%"
+    flexGrow: 1,
+    justifyContent: "flex-end",
+    '& > p': {
+      marginLeft: theme.spacing(3)
+    }
   },
   total: {
     fontWeight: "bold"
   },
   passed: {
     fontWeight: "bold",
-    color: "#cee308"
+    color: "#00e315"
   },
   failed: {
     fontWeight: "bold",
@@ -188,6 +187,9 @@ class ReportDetails extends PureComponent {
           display="flex"
           justifyContent="center"
           alignItems="center"
+          px={3}
+          pt={10}
+          pb={3}
         >
           <CircularProgress color="secondary" />
         </Box>
@@ -236,7 +238,6 @@ class ReportDetails extends PureComponent {
           <div className={classes.title}>
             <Typography variant="h6">{report.moduleName}</Typography>
           </div>
-          <div className={classes.spacer} />
           <div className={classes.info}>
             <Typography>Total</Typography>
             <Typography className={classes.total}>{report.total}</Typography>
